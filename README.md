@@ -8,3 +8,5 @@ Labs and Projects of CMU 15-213
 2023/1/10 Finished Bits,Bytes, and Integer 1 Video
 
 2023/1/14 Finished Bits,Bytes, and Integer 2 Video
+
+2023/1/24 Finished Floating Pointes Video
