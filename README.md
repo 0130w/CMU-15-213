@@ -10,3 +10,5 @@ Labs and Projects of CMU 15-213
 2023/1/14 Finished Bits,Bytes, and Integer 2 Video
 
 2023/1/24 Finished Floating Pointes Video
+
+2023/1/27 准备二月下旬接着继续往下看吧，目前的进度是第一章结束，然后datalab还差最后三个小题，后面20天的样子有点忙不过来，手头有篇论文要写，美赛要准备，还有八门考试都塞在了开学。
