@@ -152,9 +152,7 @@ int bitXor(int x, int y) {
  *   Rating: 1
  */
 int tmin(void) {
-  
-  return 2;
-
+  return 1 << 31;
 }
 //2
 /*
@@ -165,7 +163,9 @@ int tmin(void) {
  *   Rating: 1
  */
 int isTmax(int x) {
-  return 2;
+  // use ~x = x + 1 and make sure that x != -1
+  int y = ~x ^ (x + 1);
+  return !y & !!(x ^ ~0);
 }
 /* 
  * allOddBits - return 1 if all odd-numbered bits in word set to 1
@@ -176,7 +176,10 @@ int isTmax(int x) {
  *   Rating: 2
  */
 int allOddBits(int x) {
-  return 2;
+  // use XOR instead of ==
+  // 170 in Dec == 0b10101010
+  int mask = (170 << 24) | (170 << 16) | (170 << 8) | 170;
+  return !((x & mask) ^ mask);
 }
 /* 
  * negate - return -x 
@@ -186,7 +189,7 @@ int allOddBits(int x) {
  *   Rating: 2
  */
 int negate(int x) {
-  return 2;
+  return ~x + 1;
 }
 //3
 /* 
@@ -199,7 +202,7 @@ int negate(int x) {
  *   Rating: 3
  */
 int isAsciiDigit(int x) {
-  return 2;
+  return !((x +  ~0x30 + 1) >> 31) & !(((~x + 1) + 0x39) >> 31);
 }
 /* 
  * conditional - same as x ? y : z 
@@ -209,7 +212,8 @@ int isAsciiDigit(int x) {
  *   Rating: 3
  */
 int conditional(int x, int y, int z) {
-  return 2;
+  int mask = (x | (~x + 1)) >> 31;  // x = 0 => mask = 0, x != 0 => mask = 1111
+  return (mask & y) | (~mask & z);
 }
 /* 
  * isLessOrEqual - if x <= y  then return 1, else return 0 
@@ -219,7 +223,15 @@ int conditional(int x, int y, int z) {
  *   Rating: 3
  */
 int isLessOrEqual(int x, int y) {
-  return 2;
+  // x <= y doesn't mean y-x >= 0
+  // Ex. 1111 <= 0111
+  int sign_x = (x >> 31) & 1;
+  int sign_y = (y >> 31) & 1;
+  int sub = y + (~x + 1); // y - x 
+  int sub_sign = (sub >> 31) & 1;
+  int result1 = sign_x & ~sign_y; // true only if x is negetive and y is positive
+  int result2 = (!(sign_x ^ sign_y)) & !sub_sign;
+  return result1 | result2;
 }
 //4
 /* 
@@ -231,7 +243,8 @@ int isLessOrEqual(int x, int y) {
  *   Rating: 4 
  */
 int logicalNeg(int x) {
-  return 2;
+  int mask = ~((x | (~x + 1)) >> 31);
+  return mask & 1;
 }
 /* howManyBits - return the minimum number of bits required to represent x in
  *             two's complement
@@ -261,7 +274,7 @@ int howManyBits(int x) {
  *   Rating: 4
  */
 unsigned floatScale2(unsigned uf) {
-  return 2;
+  return 0;
 }
 /* 
  * floatFloat2Int - Return bit-level equivalent of expression (int) f
