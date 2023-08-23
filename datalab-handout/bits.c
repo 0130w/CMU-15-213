@@ -259,7 +259,16 @@ int logicalNeg(int x) {
  *  Rating: 4
  */
 int howManyBits(int x) {
-  return 0;
+  // very tricky...
+  int n = 0;
+  x = x ^ (x >> 31);
+  n += (!!(x >> (n + 16)) << 4);
+  n += (!!(x >> (n + 8)) << 3);
+  n += (!!(x >> (n + 4)) << 2);
+  n += (!!(x >> (n + 2)) << 1);
+  n += (!!(x >> (n + 1)));
+  n += (!!(x >> n));
+  return n + 1;
 }
 //float
 /* 
@@ -274,7 +283,16 @@ int howManyBits(int x) {
  *   Rating: 4
  */
 unsigned floatScale2(unsigned uf) {
-  return 0;
+  int sign = (uf >> 31) & 1;
+  int mask1 = 0xFF << 23;
+  int exp = uf & mask1;
+  int mask2 = ~((0xFF << 24) | (0x1 << 23));
+  int frac = mask2 & uf;
+  if (exp == mask1) { return uf; }
+  if (!exp) { return (sign << 31) | exp | (frac << 1); }
+  exp = ((exp >> 23) + 1) << 23;
+  exp = exp & ~(1 << 31);
+  return (sign << 31) | exp | frac;
 }
 /* 
  * floatFloat2Int - Return bit-level equivalent of expression (int) f
@@ -289,7 +307,21 @@ unsigned floatScale2(unsigned uf) {
  *   Rating: 4
  */
 int floatFloat2Int(unsigned uf) {
-  return 2;
+  // float exercises is allowed to use number larger than 255 I thought
+  // convert float to int just discard fractional part
+  int exp = (uf >> 23) & 0xFF;
+  int E = exp - 127;
+  int sign = (uf >> 31) & 1;
+  int value = 0;
+  int frac = (uf << 9) >> 9;
+  if(E < 0) { return 0; }
+  if(E > 30) { return 0x80000000; }
+  if(E >= 0 && E <= 23) {
+    value = (frac | 0x800000) >> (23 - E);
+  } else {
+    value = (frac | 0x800000) << (E - 23);
+  }
+  return sign ? -value : value;
 }
 /* 
  * floatPower2 - Return bit-level equivalent of the expression 2.0^x
@@ -305,5 +337,11 @@ int floatFloat2Int(unsigned uf) {
  *   Rating: 4
  */
 unsigned floatPower2(int x) {
-    return 2;
+  if(x <= -150) { return 0; }
+  if(x > -150 && x <= -127) {
+    // should be normalized
+    return x + 149;
+  }
+  if(x >= 128) { return 0xFF << 23; }  // too large, return +INF
+  return (x + 0x7F) << 23;
 }
